@@ -4,6 +4,7 @@ package graphql_golang
 
 import (
 	"context"
+	"errors"
 
 	"github.com/morykeita/graphql-golang/models"
 )
@@ -23,7 +24,7 @@ var meetups = []*models.Meetup{
 	},
 }
 
-var user = []*models.User{
+var users = []*models.User{
 	{
 		ID:       "1",
 		Username: "magicmory",
@@ -58,7 +59,19 @@ type meetupResolver struct {
 }
 
 func (m meetupResolver) User(ctx context.Context, obj *models.Meetup) (*models.User, error) {
-	panic("implement me")
+
+	user := new(models.User)
+	for _, u := range users {
+		if u.ID == obj.ID {
+			user = u
+			break
+		}
+	}
+	if user == nil {
+		return nil, errors.New("User with id does not exist")
+	}
+	return user, nil
+
 }
 
 type userResolver struct {
@@ -77,7 +90,13 @@ func (r *Resolver) User() UserResolver {
 }
 
 func (u userResolver) Meetups(ctx context.Context, obj *models.User) ([]*models.Meetup, error) {
-	return nil, nil
+	var m []*models.Meetup
+	for _, meetup := range meetups {
+		if meetup.UserID == obj.ID {
+			m = append(m, meetup)
+		}
+	}
+	return m, nil
 }
 
 func (r *queryResolver) Meetups(ctx context.Context) ([]*models.Meetup, error) {
