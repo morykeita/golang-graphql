@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"os"
 
+	graphql_golang "github.com/morykeita/graphql-golang"
+
 	"github.com/99designs/gqlgen/handler"
-	graphql_golang "github.com/morykeita/meetup"
 )
 
 const defaultPort = "8080"
@@ -16,9 +17,10 @@ func main() {
 	if port == "" {
 		port = defaultPort
 	}
+	c := graphql_golang.Config{Resolvers: &graphql_golang.Resolver{}}
 
 	http.Handle("/", handler.Playground("GraphQL playground", "/query"))
-	http.Handle("/query", handler.GraphQL(graphql_golang.NewExecutableSchema(graphql_golang.Config{Resolvers: &graphql_golang.Resolver{}})))
+	http.Handle("/query", handler.GraphQL(graphql_golang.NewExecutableSchema(c)))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

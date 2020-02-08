@@ -8,20 +8,36 @@ import (
 	"github.com/morykeita/graphql-golang/models"
 )
 
-var meetups = []models.Meetup{
+var meetups = []*models.Meetup{
 	{
 		ID:          "1",
 		Name:        "first meetup",
 		Description: "first meetup description",
+		UserID:      "2",
 	},
 	{
 		ID:          "2",
 		Name:        "second meetup",
 		Description: "second meetup description",
+		UserID:      "1",
 	},
 }
 
-type Resolver struct{}
+var user = []*models.User{
+	{
+		ID:       "1",
+		Username: "magicmory",
+		Email:    "magicmory@gmail.com",
+	},
+	{
+		ID:       "2",
+		Username: "johndoe",
+		Email:    "johndoe@gmail.com",
+	},
+}
+
+type Resolver struct {
+}
 
 func (r *Resolver) Query() QueryResolver {
 	return &queryResolver{r}
@@ -45,18 +61,25 @@ func (m meetupResolver) User(ctx context.Context, obj *models.Meetup) (*models.U
 	panic("implement me")
 }
 
-func (m mutationResolver) CreateMeetup(ctx context.Context, input NewMeetup) (*models.Meetup, error) {
-	panic("implement me")
-}
-
 type userResolver struct {
 	*Resolver
 }
 
-func (u userResolver) Meetups(ctx context.Context, obj *models.User) ([]*models.Meetup, error) {
+func (m mutationResolver) CreateMeetup(ctx context.Context, input NewMeetup) (*models.Meetup, error) {
 	panic("implement me")
+}
+func (r *Resolver) Meetup() MeetupResolver {
+	return &meetupResolver{r}
+}
+
+func (r *Resolver) User() UserResolver {
+	return &userResolver{r}
+}
+
+func (u userResolver) Meetups(ctx context.Context, obj *models.User) ([]*models.Meetup, error) {
+	return nil, nil
 }
 
 func (r *queryResolver) Meetups(ctx context.Context) ([]*models.Meetup, error) {
-	panic("not implemented")
+	return meetups, nil
 }

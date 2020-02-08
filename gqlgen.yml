@@ -18,7 +18,7 @@ models:
   Meetup:
     model: github.com/morykeita/graphql-golang/models.Meetup
     fields:
-      meetups:
+      user:
         resolver: true
 
 resolver:
