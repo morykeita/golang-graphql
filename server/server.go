@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/morykeita/graphql-golang/database"
+
 	graphql_golang "github.com/morykeita/graphql-golang"
 
 	"github.com/99designs/gqlgen/handler"
@@ -13,6 +15,16 @@ import (
 const defaultPort = "8080"
 
 func main() {
+
+	DB := database.New(&pg.Options{
+		User:     "",
+		Password: "",
+		Database: "",
+	})
+
+	DB.Close()
+	DB.AddQueryHook(database.DBlogger{})
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
