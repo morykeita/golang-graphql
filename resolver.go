@@ -5,7 +5,7 @@ package graphql_golang
 import (
 	"context"
 	"errors"
-
+	"github.com/morykeita/graphql-golang/database"
 	"github.com/morykeita/graphql-golang/models"
 )
 
@@ -24,20 +24,9 @@ var meetups = []*models.Meetup{
 	},
 }
 
-var users = []*models.User{
-	{
-		ID:       "1",
-		Username: "magicmory",
-		Email:    "magicmory@gmail.com",
-	},
-	{
-		ID:       "2",
-		Username: "johndoe",
-		Email:    "johndoe@gmail.com",
-	},
-}
-
 type Resolver struct {
+	database.MeetupsRepository
+	database.UserRepository
 }
 
 func (r *Resolver) Query() QueryResolver {
@@ -58,20 +47,8 @@ type meetupResolver struct {
 	*Resolver
 }
 
-func (m meetupResolver) User(ctx context.Context, obj *models.Meetup) (*models.User, error) {
-
-	user := new(models.User)
-	for _, u := range users {
-		if u.ID == obj.ID {
-			user = u
-			break
-		}
-	}
-	if user == nil {
-		return nil, errors.New("User with id does not exist")
-	}
-	return user, nil
-
+func (m *meetupResolver) User(ctx context.Context, obj *models.Meetup) (*models.User, error) {
+	return m.UserRepository.GetUserById(obj.UserID)
 }
 
 type userResolver struct {
@@ -79,7 +56,18 @@ type userResolver struct {
 }
 
 func (m mutationResolver) CreateMeetup(ctx context.Context, input NewMeetup) (*models.Meetup, error) {
-	panic("implement me")
+	if len(input.Name) < 3{
+		return nil, errors.New("name should be at least 3 characters long")
+	}
+	if len(input.Description) < 3{
+		return nil, errors.New("description should be at least 3 characters long")
+	}
+	meetup := &models.Meetup{
+		Name:        input.Name,
+		Description: input.Description,
+		UserID:      "1",
+	}
+	return m.MeetupsRepository.CreateMeetup(meetup)
 }
 func (r *Resolver) Meetup() MeetupResolver {
 	return &meetupResolver{r}
@@ -100,5 +88,5 @@ func (u userResolver) Meetups(ctx context.Context, obj *models.User) ([]*models.
 }
 
 func (r *queryResolver) Meetups(ctx context.Context) ([]*models.Meetup, error) {
-	return meetups, nil
+	return r.MeetupsRepository.GetMeetups()
 }
